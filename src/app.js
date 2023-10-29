@@ -12,6 +12,9 @@ app.set("port", 4000); //El puerto podemos modificarlo a nuestro gusto
 //Middleware
 app.use(morgan("dev"));
 
+//Configuración para que express pueda manejar achivos JSON y no de un error de undefined
+app.use(express.json());
+
 //Rutas que emplea nuestra app, podemos redefinirlas aquí:
 app.use("/api/movies", moviesRoutes);
 
