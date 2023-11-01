@@ -18,7 +18,7 @@ const getMovieById = async (req, res) => {
 
         const connection = await getConnection();
         const result = await connection.query("SELECT * FROM moviesTable WHERE id=?", id)
-        return res.status(200).json(result);
+        return res.status(200).json(result[0] ?? null);
     } catch (error) {
         res.status(500).send("Ha habido un error: ", error.message)
     }
