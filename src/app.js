@@ -1,8 +1,9 @@
 import express from "express";
 import morgan from "morgan";
 
-//Llamamos a nuestro archivo de rutas
+//Llamamos a nuestros archivos de rutas
 import moviesRoutes from "./routes/movies.routes";
+import userRoutes from "./routes/users.routes";
 
 const app = express();
 
@@ -20,11 +21,11 @@ app.use(cors({origin: whiteList}));
 //Middleware
 app.use(morgan("dev"));
 
-
 //Configuración para que express pueda manejar achivos JSON y no de un error de undefined
 app.use(express.json());
 
 //Rutas que emplea nuestra app, podemos redefinirlas aquí:
 app.use("/api/movies", moviesRoutes);
+app.use("/api/users", userRoutes);
 
 export default app;

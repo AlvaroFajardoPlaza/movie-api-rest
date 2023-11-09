@@ -49,7 +49,7 @@ const updateMovie = async(req, res) => {
         const { title, year, summary, comment } = req.body;
 
         //Creamos la condición que nos permita editar la película y completar la petición.
-        if (id === undefined || title === undefined || summary === undefined) {
+        if (!(id || title || summary)) {
             res.status(400).send("Bad request. Tienes que rellenar los campos de 'title' y 'summary'.")
         }
 
