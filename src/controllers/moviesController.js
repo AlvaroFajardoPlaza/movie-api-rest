@@ -46,32 +46,29 @@ const addMovie = async (req, res) => {
 		} = req.body;
 
 		//Incluimos condición de info necesaria para el post
-		if (!(title || year || summary)) {
+		if (!title || !year || !summary) {
 			res.status(400).send(
 				"Bad request. Tienes que rellenar los campos de 'title' y 'summary'."
 			);
 		}
 
 		const newMovie = {
-			title: req.body.title,
-			year: req.body.year,
-			summary: req.body.summary,
-			comment: req.body.comment,
-			image: req.body.image,
-			// rating,
-			genre1: req.body.genre1,
-			genre2: req.body.genre2,
-			cast: req.body.cast,
-			director: req.body.director
+			...req.body
 		};
-		const connection = await getConnection();
-		const result = await connection.query(
-			'INSERT INTO moviesTable SET ?',
+		console.log(
+			'Esta es la nueva película que queremos añadir: ',
 			newMovie
 		);
-		res.status(200).json({ message: 'New movie added!' });
+		const connection = await getConnection();
+		console.log('Conexion: ', connection);
+		const result = await connection.query(
+			`INSERT INTO moviesTable SET ?`,
+			newMovie
+		);
+		console.log('El resultado del post: ', result);
+		res.status(201).json({ message: 'New movie added!' });
 	} catch (error) {
-		res.status(500).send('Ha habido un error: ', error.message);
+		res.status(500).json({ error: error.message });
 	}
 };
 
