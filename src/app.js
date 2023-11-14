@@ -25,6 +25,6 @@ app.use(express.json());
 //Rutas que emplea nuestra app, podemos redefinirlas aquí:
 app.use('/api/movies', moviesRoutes);
 app.use('/api/users', userRoutes);
-app.use('api/comments', commentsRouter);
+app.use('/api/comments', commentsRouter);
 
 export default app;
