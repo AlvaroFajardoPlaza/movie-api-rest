@@ -99,6 +99,12 @@ const login = async (req, res) => {
 	}
 };
 
+async function findUserById(id) {
+	const connection = await getConnection();
+	const result = await connection.query(`SELECT * FROM users WHERE id=?`, id);
+	return result[0] ?? null;
+}
+
 // En esta función recibimos los datos del usuario a partir del token que le hemos otorgado
 const me = async (req, res) => {
 	const { token } = req.body;
@@ -157,9 +163,3 @@ export const methods = {
 	login,
 	me
 };
-
-async function findUserById(id) {
-	const connection = await getConnection();
-	const result = await connection.query(`SELECT * FROM users WHERE id=?`, id);
-	return result[0] ?? null;
-}

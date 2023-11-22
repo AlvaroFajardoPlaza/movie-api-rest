@@ -22,11 +22,11 @@ const findById = async (req, res) => {
 
 		const connection = await getConnection();
 		const result = await connection.query(
-			`SELECT * FROM commentsTable WHERE id=?`,
+			`SELECT * FROM commentsTable WHERE movieId=?`,
 			id
 		);
-		console.log('Hemos encontrado el comentario? ', result[0]);
-		res.status(200).json(result[0] ?? null);
+		console.log('Hemos encontrado los comentarios? ', result); // Si quisieramos acceder al primer resultado de la matriz sería result[0]
+		res.status(200).json(result ?? null);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
@@ -96,6 +96,7 @@ export const methods = {
 	findById,
 	findByUser,
 	newComment,
+	averageRatingOneMovie,
 	updateComment,
 	deleteComment
 };

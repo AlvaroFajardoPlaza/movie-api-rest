@@ -38,9 +38,8 @@ const addMovie = async (req, res) => {
 			summary,
 			comment,
 			image,
-			// rating,
 			genre1,
-			genre2,
+			// genre2,
 			cast,
 			director
 		} = req.body;
