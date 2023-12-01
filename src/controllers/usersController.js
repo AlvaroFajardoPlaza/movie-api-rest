@@ -17,6 +17,35 @@ const getAll = async (req, res) => {
 	}
 };
 
+// Conseguimos el rol del usuario pasándole su id.
+const getRole = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const connection = await getConnection();
+		const result = await connection.query(
+			`SELECT * FROM userHasRole WHERE userId=?`,
+			id
+		);
+		console.log('Primer resultado a la llamada:', [result]);
+
+		// Para poder recibir los roles ahora de su tabla correcta tenemos que volver a hacer una petición como promesa
+		const promises = result.map(async (role) => {
+			const { roleId } = role;
+			const roleResult = await connection.query(
+				`SELECT * FROM roles WHERE id=?`,
+				roleId
+			);
+			console.log(roleResult);
+			return roleResult[0] ?? null;
+		});
+		// Recuerda que tenemos que resolver la promesa que hemos creado arriba con await Promise.all
+		const [userRoleReturned] = await Promise.all(promises);
+		res.status(200).json(userRoleReturned);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 const register = async (req, res) => {
 	try {
 		const { username, email, password } = req.body;
@@ -105,7 +134,7 @@ async function findUserById(id) {
 	return result[0] ?? null;
 }
 
-// En esta función recibimos los datos del usuario a partir del token que le hemos otorgado
+// En esta función recibimos los datos del usuario a partir del token que le hemos otorgado y su rol de la tabla userHasRole
 const me = async (req, res) => {
 	const { token } = req.body;
 
@@ -159,6 +188,7 @@ const invalidate = async (req, res) => {
 
 export const methods = {
 	getAll,
+	getRole,
 	register,
 	login,
 	me

@@ -91,12 +91,46 @@ const deleteComment = async (req, res) => {
 	}
 };
 
+// En esta función tenemos que traer el listado de comentarios por MovieId y de esa lista calcular el rating total.
+const getRatingByMovieId = async (req, res) => {
+	try {
+		console.log(req.params);
+		const movieId = req.params.id;
+
+		if (!movieId) {
+			res.status(400).send('Bad request.');
+		}
+		const connection = await getConnection();
+		const commentList = await connection.query(
+			`SELECT * FROM commentsTable WHERE movieId=?`,
+			movieId
+		);
+		console.log('Nuestra lista de comentarios es: ', commentList);
+
+		// A partir de aquí tenemos que trabajar con los resultados de nuestra lista de comentarios
+		// Nuestra variable para guardar la sumatoria tras recorrer el bucle
+		let totalRating = 0;
+
+		for (const comment of commentList) {
+			console.log('Accedemos al rating del comment?', comment.rating);
+			totalRating += comment.rating;
+		}
+		// Hacemos la media aritmética
+		const averageRating = totalRating / commentList.length;
+		const finalResult = Math.round(averageRating * 100) / 100;
+
+		res.status(200).json({ finalResult });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 export const methods = {
 	getAll,
 	findById,
 	findByUser,
 	newComment,
-	averageRatingOneMovie,
 	updateComment,
-	deleteComment
+	deleteComment,
+	getRatingByMovieId
 };
