@@ -32,19 +32,6 @@ const findById = async (req, res) => {
 	}
 };
 
-// Buscar todos los comentarios de un determinado usuario ---> SELECT * FROM commentsTable WHERE user = username
-const findByUser = async (req, res) => {
-	try {
-		const username = ''; // Como podemos extraer el username desde el front...
-		console.log(
-			'solicitamos todos los comentarios del usuario: ',
-			username
-		);
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-};
-
 const newComment = async (req, res) => {
 	try {
 		const { comment, rating, user } = req.body;
@@ -125,12 +112,30 @@ const getRatingByMovieId = async (req, res) => {
 	}
 };
 
+// Función GET para llamar a los comentarios de un solo usuario en su panel de usuario
+const userCommentsByUsername = async (req, res) => {
+	try {
+		console.log(req.params);
+		const { username } = req.params;
+		const connection = await getConnection();
+		const result = await connection.query(
+			`SELECT * FROM commentsTable WHERE user=?`,
+			username
+		);
+
+		// Hemos obtenido el resultado de los comentarios del usuario... pero hay que recoger también los datos de las películas
+		const promises = res.status(200).json(result);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 export const methods = {
 	getAll,
 	findById,
-	findByUser,
 	newComment,
 	updateComment,
 	deleteComment,
-	getRatingByMovieId
+	getRatingByMovieId,
+	userCommentsByUsername
 };

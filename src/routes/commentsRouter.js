@@ -6,7 +6,10 @@ const commentsRouter = Router();
 commentsRouter.get('/', commentsController.getAll);
 commentsRouter.get('/:id', commentsController.findById);
 commentsRouter.get('/rating/:id', commentsController.getRatingByMovieId);
-commentsRouter.get('/:username', commentsController.findByUser);
+commentsRouter.get(
+	'/myUser/:username',
+	commentsController.userCommentsByUsername
+);
 // POST
 commentsRouter.post('/', commentsController.newComment);
 // DELETE
