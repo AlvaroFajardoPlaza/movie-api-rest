@@ -13,6 +13,7 @@ moviesRouter.get('/:id/genres', moviesController.getMovieGenresByMovieId);
 moviesRouter.post('/', moviesController.addMovie);
 // PUT
 moviesRouter.put('/:id', moviesController.updateMovie);
+moviesRouter.put('/softdel/:id', moviesController.softDeleteMovie);
 // DELETE
 moviesRouter.delete('/:id', moviesController.deleteMovie);
 

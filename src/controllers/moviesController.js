@@ -1,9 +1,12 @@
 import { getConnection } from '../database/database';
 
+// Traemos todas las películas, menos las que han sido elimiandas.
 const getMovies = async (req, res) => {
 	try {
 		const connection = await getConnection();
-		const result = await connection.query(`SELECT * FROM moviesTable`);
+		const result = await connection.query(
+			`SELECT * FROM moviesTable WHERE is_deleted != 1`
+		);
 		console.log(result);
 		res.status(200).json(result);
 	} catch (error) {
@@ -184,6 +187,7 @@ const updateMovie = async (req, res) => {
 	}
 };
 
+// ESTE ES UN HARD DELETE QUE NOS ELIMINA LA PELÍCULA DE LA BASE DE DATOS
 const deleteMovie = async (req, res) => {
 	try {
 		console.log(req.params);
@@ -202,6 +206,28 @@ const deleteMovie = async (req, res) => {
 	}
 };
 
+// Query para hacer un UPDATE ---> 'UPDATE moviesTable SET is_deleted = 1 WHERE id=?', id
+const softDeleteMovie = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const connection = await getConnection();
+		const softDelete = await connection.query(
+			'UPDATE moviesTable SET is_deleted = 1 WHERE id=?',
+			id
+		);
+		const result = await connection.query(
+			'SELECT * FROM moviesTable WHERE id=?',
+			id
+		);
+		res.status(200).json({
+			msg: 'Movie soft-deleted successfully.',
+			result
+		});
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 export const methods = {
 	getMovies,
 	getAllGenres,
@@ -210,5 +236,6 @@ export const methods = {
 	getMoviesByGenreId,
 	addMovie,
 	updateMovie,
+	softDeleteMovie,
 	deleteMovie
 };
