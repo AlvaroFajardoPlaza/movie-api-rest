@@ -105,14 +105,18 @@ const getMoviesByGenreId = async (req, res) => {
 		const promises = matriz.map(async (object) => {
 			let { movieId } = object;
 			const movie = await connection.query(
-				`SELECT * FROM moviesTable WHERE id=?`,
+				`SELECT * FROM moviesTable WHERE id=? AND is_deleted=0`,
 				movieId
 			);
 			return movie[0];
 		});
-
+		// Devolvemos las promesas
 		const filteredMovieListByGenre = await Promise.all(promises);
-		res.status(200).json(filteredMovieListByGenre ?? null);
+		// Filtramos los resultados para no meter dentro de la lista las películas eliminadas == null
+		const extractedMovies = filteredMovieListByGenre.filter(
+			(movie) => movie != null
+		);
+		res.status(200).json(extractedMovies ?? null);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
