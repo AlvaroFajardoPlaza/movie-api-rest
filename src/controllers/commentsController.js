@@ -17,12 +17,12 @@ const findById = async (req, res) => {
 		const id = req.params.id;
 
 		if (!id) {
-			res.status(400).send('bad request. Este comentario no existe');
+			res.status(400).send('bad request. Esta peli no existe.');
 		}
 
 		const connection = await getConnection();
 		const result = await connection.query(
-			`SELECT * FROM commentsTable WHERE movieId=?`,
+			`SELECT * FROM commentsTable WHERE movieId=? AND is_deleted = 0`,
 			id
 		);
 		console.log('Hemos encontrado los comentarios? ', result); // Si quisieramos acceder al primer resultado de la matriz sería result[0]
@@ -62,6 +62,7 @@ const updateComment = async (req, res) => {
 	}
 };
 
+// HARD DELETE
 const deleteComment = async (req, res) => {
 	try {
 		console.log(req.params);
@@ -73,6 +74,21 @@ const deleteComment = async (req, res) => {
 			id
 		);
 		res.status(200).json({ msg: 'Removed comment.' });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+// SOFT DELETE ---> PUT
+const softDelete = async (req, res) => {
+	try {
+		const { id } = req.params; // No estoy seguro de necesitar esto realmente
+		const connection = await getConnection();
+		const softDelete = await connection.query(
+			'UPDATE commentsTable SET is_deleted = 1 WHERE id=?',
+			id
+		);
+		res.status(200).json({ msg: 'Review soft deleted', softDelete });
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
@@ -113,29 +129,64 @@ const getRatingByMovieId = async (req, res) => {
 };
 
 // Función GET para llamar a los comentarios de un solo usuario en su panel de usuario
-const userCommentsByUsername = async (req, res) => {
+const userReviewsByUsername = async (req, res) => {
+	// try {
+	// 	console.log(req.params);
+	// 	const { username } = req.params;
+	// 	const connection = await getConnection();
+	// 	const result = await connection.query(
+	// 		`SELECT * FROM commentsTable WHERE user=? AND is_deleted = 0`,
+	// 		username
+	// 	);
+	// 	// Hemos obtenido el resultado de las reviews del usuario... pero hay que recoger también los datos de las películas.
+	// 	// Por cada review que recibimos, tenemos que volver a lanzar una petición que devuelva los datos de la película a la que pertenece dicha review...
+	// 	const promises = result.map(async (review) => {
+	// 		let movieId = review.movieId;
+	// 		console.log('Tenemos el movieId', movieId);
+	// 		const movie = await connection.query(
+	// 			`SELECT * FROM moviesTable WHERE id=?`,
+	// 			movieId
+	// 		);
+	// 		review['movie'] = movie[0];
+	// 		console.log(review);
+	// 		return review;
+	// 	});
+	// 	const finalResult = await Promise.all(promises);
+	// 	res.status(200).json(finalResult);
+	// } catch (error) {
+	// 	res.status(500).json({ error: error.message });
+	// }
+	const { username } = req.params;
+	const connection = await getConnection();
+	// Manejando todo dentro de la misma query a MYSQL
 	try {
-		console.log(req.params);
-		const { username } = req.params;
-		const connection = await getConnection();
 		const result = await connection.query(
-			`SELECT * FROM commentsTable WHERE user=?`,
+			`SELECT comments.*, movies.title as movieTitle
+			FROM commentsTable AS comments
+			LEFT JOIN moviesTable AS movies ON movies.id = comments.movieId
+			WHERE 
+				user=? AND comments.is_deleted = 0`,
 			username
 		);
 
-		// Hemos obtenido el resultado de los comentarios del usuario... pero hay que recoger también los datos de las películas
-		const promises = res.status(200).json(result);
+		const finalResults = result.filter(
+			(review) => review.movieTitle != null
+		);
+		res.status(200).json(finalResults);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
 };
+
+// Llamada a las reviews de un usuario unido a los datos de la peli
 
 export const methods = {
 	getAll,
 	findById,
 	newComment,
 	updateComment,
+	softDelete,
 	deleteComment,
 	getRatingByMovieId,
-	userCommentsByUsername
+	userReviewsByUsername
 };
