@@ -5,6 +5,7 @@ const userRoutes = Router();
 
 userRoutes.get('/', userController.getAll);
 userRoutes.get('/role/:id', userController.getRole);
+userRoutes.get('/userInfo/:userUsername', userController.findUserByUsername);
 // POST
 userRoutes.post('/register', userController.register);
 userRoutes.post('/login', userController.login);

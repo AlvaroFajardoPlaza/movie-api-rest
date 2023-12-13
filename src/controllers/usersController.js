@@ -17,6 +17,21 @@ const getAll = async (req, res) => {
 	}
 };
 
+const findUserByUsername = async (req, res) => {
+	// Recuerda solicitar la conexión a la BBDD
+	const connection = await getConnection();
+	try {
+		const { userUsername } = req.params;
+		const result = await connection.query(
+			`SELECT * FROM users WHERE username=?`,
+			userUsername
+		);
+		res.status(200).json(result[0] ?? null);
+	} catch (err) {
+		res.status(500).json({ err: err.message });
+	}
+};
+
 // Conseguimos el rol del usuario pasándole su id.
 const getRole = async (req, res) => {
 	try {
@@ -128,12 +143,6 @@ const login = async (req, res) => {
 	}
 };
 
-async function findUserById(id) {
-	const connection = await getConnection();
-	const result = await connection.query(`SELECT * FROM users WHERE id=?`, id);
-	return result[0] ?? null;
-}
-
 // En esta función recibimos los datos del usuario a partir del token que le hemos otorgado y su rol de la tabla userHasRole
 const me = async (req, res) => {
 	const { token } = req.body;
@@ -163,6 +172,12 @@ const me = async (req, res) => {
 	res.status(201).json(user);
 };
 
+async function findUserById(id) {
+	const connection = await getConnection();
+	const result = await connection.query(`SELECT * FROM users WHERE id=?`, id);
+	return result[0] ?? null;
+}
+
 const invalidate = async (req, res) => {
 	const { token } = req.body;
 
@@ -188,6 +203,7 @@ const invalidate = async (req, res) => {
 
 export const methods = {
 	getAll,
+	findUserByUsername,
 	getRole,
 	register,
 	login,
